@@ -22,7 +22,7 @@ locals {
 
 module "self_signed_cert_ca" {
   source  = "cloudposse/ssm-tls-self-signed-cert/aws"
-  version = "1.0.0"
+  version = "1.1.0"
 
   attributes = ["self", "signed", "cert", "ca"]
 
@@ -168,6 +168,14 @@ resource "aws_ec2_client_vpn_endpoint" "default" {
     enabled               = var.logging_enabled
     cloudwatch_log_group  = local.cloudwatch_log_group
     cloudwatch_log_stream = local.cloudwatch_log_stream
+  }
+
+  dynamic "client_connect_options" {
+    for_each = var.connection_authorization_lambda_arn == null ? [] : [1]
+    content {
+      enabled             = true
+      lambda_function_arn = var.connection_authorization_lambda_arn
+    }
   }
 
   dns_servers  = var.dns_servers
